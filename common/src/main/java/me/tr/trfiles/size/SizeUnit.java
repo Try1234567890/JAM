@@ -56,7 +56,7 @@ public enum SizeUnit {
     public static SizeUnit parse(String str) {
         try {
             return SizeUnit.valueOf(str.toUpperCase());
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException _) {
             return Arrays.stream(SizeUnit.values()).filter(
                     unit -> unit.getTag().equalsIgnoreCase(str)
             ).findFirst().orElse(null);

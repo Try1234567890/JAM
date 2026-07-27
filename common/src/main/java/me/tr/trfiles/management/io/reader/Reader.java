@@ -1,57 +1,66 @@
 package me.tr.trfiles.management.io.reader;
 
+import com.github.utilities.validators.Preconditions;
+import me.tr.trfiles.management.io.IOProcess;
+
 import java.io.IOException;
 import java.util.Optional;
 
-public interface Reader<T, R> {
+public abstract class Reader<I, R> extends IOProcess<I> {
+    protected abstract R readOrThrown0(I input, int from, int to) throws IOException;
 
-    R readOrThrown(T file, long from, long to) throws IOException;
+    public R readOrThrown(I input, int from, int to) throws IOException {
+        Preconditions.parameterNotNull(input, "input");
 
-    default R readOrThrown(T file, long from) throws IOException {
-        return readOrThrown(file, from, -1);
+        checkIndexes(input, from, to);
+        return readOrThrown0(input, from, to);
     }
 
-    default R readOrThrown(T file) throws IOException {
-        return readOrThrown(file, 0);
+    public R readOrThrown(I input, int from) throws IOException {
+        return readOrThrown(input, from, size(input));
     }
 
-    default Optional<R> read(T file, long from, long to) {
+    public R readOrThrown(I input) throws IOException {
+        return readOrThrown(input, 0);
+    }
+
+    public Optional<R> read(I input, int from, int to) {
         try {
-            return Optional.of(readOrThrown(file, from, to));
+            return Optional.of(readOrThrown(input, from, to));
         } catch (IOException ignore) {
         }
         return Optional.empty();
     }
 
-    default Optional<R> read(T file, long from) {
-        return read(file, from, -1);
+    public Optional<R> read(I input, int from) {
+        return read(input, from, size(input));
     }
 
-    default Optional<R> read(T file) {
-        return read(file, 0);
+    public Optional<R> read(I input) {
+        return read(input, 0);
     }
 
-    default R readOrNull(T file, long from, long to) {
-        return read(file, from, to).orElse(null);
+    public R readOrNull(I input, int from, int to) {
+        return read(input, from, to).orElse(null);
     }
 
-    default R readOrNull(T file, long from) {
-        return readOrNull(file, from, -1);
+    public R readOrNull(I input, int from) {
+        return readOrNull(input, from, size(input));
     }
 
-    default R readOrNull(T file) {
-        return readOrNull(file, 0);
+    public R readOrNull(I input) {
+        return readOrNull(input, 0);
     }
 
-    default R readOrDefault(T file, long from, long to, R def) {
-        return read(file, from, to).orElse(def);
+    public R readOrDefault(I input, int from, int to, R def) {
+        return read(input, from, to).orElse(def);
     }
 
-    default R readOrDefault(T file, long from, R def) {
-        return readOrDefault(file, from, -1, def);
+    public R readOrDefault(I input, int from, R def) {
+        return readOrDefault(input, from, size(input), def);
     }
 
-    default R readOrDefault(T file, R def) {
-        return readOrDefault(file, 0, def);
+    public R readOrDefault(I input, R def) {
+        return readOrDefault(input, 0, def);
     }
 }

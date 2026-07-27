@@ -3,18 +3,26 @@ package me.tr.trfiles.management.io.reader.stream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class BytesStreamReader implements ISReader<byte[]> {
+public class BytesStreamReader extends StreamReader<byte[]> {
+    private BytesStreamReader() {
+    }
+
+    private record Holder() {
+        private static final BytesStreamReader INSTANCE = new BytesStreamReader();
+    }
+
+    public static BytesStreamReader getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @Override
-    public byte[] readOrThrown(InputStream is, long from, long to) throws IOException {
-        int len = (int) (to - from);
-        is.skip(from);
-
+    protected byte[] readOrThrown0(InputStream input, int from, int to) throws IOException {
+        int len = (to - from);
         byte[] buf = new byte[len];
-        int bytesRead = is.read(buf, 0, len);
+        int bytesRead = input.read(buf, from, len);
 
         if (bytesRead != len) {
-            throw new java.io.IOException("Cannot read all content of provided input stream.");
+            throw new IOException("Cannot read all content of provided input stream.");
         }
 
         return buf;

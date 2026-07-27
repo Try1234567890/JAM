@@ -1,6 +1,6 @@
 package me.tr.trfiles.os;
 
-import me.tr.trfiles.Validator;
+import com.github.utilities.validators.Preconditions;
 
 public enum OSType {
 
@@ -34,7 +34,7 @@ public enum OSType {
      * @return The {@link OSType} parsed from the string if found, otherwise {@code null}.
      */
     public static OSType fromString(String str) {
-        if (Validator.isNull(str, null)) return null;
+        Preconditions.parameterNotNull(str, "str");
         for (OSType type : values()) {
             String name = type.name().toLowerCase();
             if (str.toLowerCase().contains(name)) {

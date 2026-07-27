@@ -1,6 +1,6 @@
 package me.tr.trfiles.os;
 
-import me.tr.trfiles.Validator;
+import com.github.utilities.validators.Preconditions;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -22,7 +22,7 @@ public class OSUtility {
      * @see #isLinux()
      */
     public static boolean isWin() {
-        Validator.isNull(OS_NAME, "The OS Name property is null.");
+        Preconditions.completeNotNull(OS_NAME, "The OS Name property is null.");
         return OS_NAME.contains("Win");
     }
 
@@ -38,7 +38,7 @@ public class OSUtility {
      * @see #isLinux()
      */
     public static boolean isMac() {
-        Validator.isNull(OS_NAME, "The OS Name property is null.");
+        Preconditions.completeNotNull(OS_NAME, "The OS Name property is null.");
         return OS_NAME.contains("Mac");
     }
 
@@ -54,7 +54,7 @@ public class OSUtility {
      * @see #isWin()
      */
     public static boolean isLinux() {
-        Validator.isNull(OS_NAME, "The OS Name property is null.");
+        Preconditions.completeNotNull(OS_NAME, "The OS Name property is null.");
         return OS_NAME.contains("Linux");
     }
 
@@ -64,12 +64,12 @@ public class OSUtility {
      * This method simply call the {@link String#replace(char, char)}
      * from the provided path.
      *
-     * @param path The file path to replace backslash from.
+     * @param path The file path to replaced backslash from.
      * @return A new String instance with backslash ("\\") replace to slash ("/").
      * @throws NullPointerException if the provided path is null or empty.
      */
     public static String toSlash(String path) {
-        Validator.isNull(path, "The path property is null.");
+        Preconditions.parameterNotNull(path, "path");
         return path.replace('\\', '/');
     }
 
@@ -84,7 +84,7 @@ public class OSUtility {
      * @throws NullPointerException if the provided path is null or empty.
      */
     public static String toBackSlash(String path) {
-        Validator.isNull(path, "The path property is null.");
+        Preconditions.parameterNotNull(path, "path");
         return path.replace('/', '\\');
     }
 
@@ -106,19 +106,19 @@ public class OSUtility {
      * @throws NullPointerException if the path is null
      */
     public static String validatePath(String path) {
-        Validator.isNull(path, "The path property is null.");
+        Preconditions.parameterNotNull(path, "path");
         if (OS == null) return path;
 
-        path = toBackSlash(path);
+        String newPath = toBackSlash(path);
         Set<Character> illegalChars = Arrays.stream(OS.getIllegalChars()).collect(Collectors.toSet());
 
         StringBuilder builder = new StringBuilder();
         boolean isURL = false;
-        int len = path.length();
+        int len = newPath.length();
         int diskLetterIndex = 0;
 
         for (int i = 0; i < len; i++) {
-            char ch = path.charAt(i);
+            char ch = newPath.charAt(i);
 
             if (illegalChars.contains(ch)) {
                 if (ch == ':' && !builder.isEmpty()) {
@@ -133,7 +133,7 @@ public class OSUtility {
                     if (isWin()) {
                         builder.append('?');
                         diskLetterIndex = 4;
-                    } else if (i + 1 < len && path.charAt(i + 1) == '\\') {
+                    } else if (i + 1 < len && newPath.charAt(i + 1) == '\\') {
                         builder.setLength(0);
                     }
                 }

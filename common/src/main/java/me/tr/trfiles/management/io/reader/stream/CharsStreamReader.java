@@ -3,21 +3,27 @@ package me.tr.trfiles.management.io.reader.stream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class CharsStreamReader implements ISReader<char[]> {
+public class CharsStreamReader extends StreamReader<char[]> {
+    private CharsStreamReader() {
+    }
+
+    private record Holder() {
+        private static final CharsStreamReader INSTANCE = new CharsStreamReader();
+    }
+
+    public static CharsStreamReader getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @Override
-    public char[] readOrThrown(InputStream is, long from, long to) throws IOException {
-        int len = (int) (to - from);
-        is.skip(from);
-
+    protected char[] readOrThrown0(InputStream input, int from, int to) throws IOException {
+        int len = (to - from);
         byte[] buf = new byte[len];
-
-        int bytesRead = is.read(buf, 0, len);
+        int bytesRead = input.read(buf, from, len);
 
         if (bytesRead != len) {
-            throw new java.io.IOException("Cannot read all content of provided input stream.");
+            throw new IOException("Cannot read all content of provided input stream.");
         }
-
         char[] chars = new char[len];
 
         for (int i = 0; i < len; i++) {
@@ -26,4 +32,5 @@ public class CharsStreamReader implements ISReader<char[]> {
 
         return chars;
     }
+
 }

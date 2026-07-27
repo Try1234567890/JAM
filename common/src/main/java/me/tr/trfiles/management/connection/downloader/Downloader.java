@@ -1,17 +1,24 @@
 package me.tr.trfiles.management.connection.downloader;
 
+import me.tr.trfiles.options.Option;
+
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 
-public interface Downloader<D> {
+public abstract class Downloader<D> {
 
-    D downloadOrThrown(URL url, D destination) throws IOException;
+    public abstract D downloadOrThrown(URL url, D destination) throws IOException;
 
-    default D download(URL url, D destination) {
+    public Optional<D> download(URL url, D destination) {
         try {
-            return downloadOrThrown(url, destination);
+            return Optional.ofNullable(downloadOrThrown(url, destination));
         } catch (IOException ignored) {
-            return destination;
+            return Optional.empty();
         }
+    }
+
+    public D downloadOrNull(URL url, D destination) {
+        return download(url, destination).orElse(null);
     }
 }

@@ -3,14 +3,16 @@ package me.tr.trfiles.management.connection.uploader;
 import java.io.IOException;
 import java.net.URL;
 
-public interface Uploader<D> {
+public abstract class Uploader<D> {
 
-    void uploadOrThrown(D source, URL url) throws IOException;
+    public abstract void uploadOrThrown(URL url, D source) throws IOException;
 
-    default void upload(D source, URL url) {
+    public boolean upload(URL url, D source) {
         try {
-            uploadOrThrown(source, url);
-        } catch (IOException ignored) {
+            uploadOrThrown(url, source);
+            return true;
+        } catch (IOException _) {
+            return false;
         }
     }
 }

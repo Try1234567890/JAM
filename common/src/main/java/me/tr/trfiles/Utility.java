@@ -1,10 +1,42 @@
 package me.tr.trfiles;
 
+import com.github.utilities.validators.Preconditions;
+
+import java.util.Arrays;
+
 public class Utility {
     private Utility() throws InstantiationException {
         throw new InstantiationException("Cannot instantiate utility class.");
     }
 
+    public static final int THREADS_AMOUNT = Runtime.getRuntime().availableProcessors();
+    public static final String NEWLINE = System.lineSeparator();
+
+    /**
+     * Retrieves all lines of {@code content}.
+     * <p>
+     * The content will be split by the newline character.
+     *
+     * @param content The content to retrieve the lines from.
+     * @return An array of lines.
+     */
+    public static String[] getAllLines(String content) {
+        return Preconditions.simpleNotNull(content, "").split(NEWLINE, -1);
+    }
+
+    /**
+     * Retrieves all the non-empty lines of the {@code content}.
+     * <p>
+     * The content will be split by the newline character.
+     *
+     * @param content The content to retrieve the lines from.
+     * @return An array of non-empty lines.
+     */
+    public static String[] getLines(String content) {
+        return Arrays.stream(getAllLines(content))
+                .filter(line -> !line.trim().isEmpty())
+                .toArray(String[]::new);
+    }
 
     /**
      * Parse a float from a string.

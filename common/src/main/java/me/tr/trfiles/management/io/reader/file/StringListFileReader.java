@@ -1,35 +1,28 @@
 package me.tr.trfiles.management.io.reader.file;
 
-import me.tr.trfiles.Validator;
+import me.tr.trfiles.management.io.reader.path.StringListPathReader;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.InvalidPathException;
 import java.util.List;
 
-public class StringListFileReader implements FileReader<List<String>> {
+public class StringListFileReader extends FileReader<List<String>> {
+    private StringListFileReader() {
+    }
+
+    private record Holder() {
+        private static final StringListFileReader INSTANCE = new StringListFileReader();
+    }
+
+    public static StringListFileReader getInstance() {
+        return Holder.INSTANCE;
+    }
+
 
     @Override
-    public List<String> readOrThrown(File file, long from, long to) throws IOException {
-        Validator.checkIf(file.isFile(), "is not a file");
-        Validator.checkIf(file.exists(), "not exists");
-        Validator.checkIf(file.canRead(), "not readable");
-
-        from = Math.max(from, 0);
-        to = Math.max(to, file.length());
-
-        try (BufferedReader reader = new BufferedReader(new java.io.FileReader(file))) {
-            List<String> result = new ArrayList<>();
-
-            int i = 0;
-            String line;
-            while ((i++ > to || i < from) && (line = reader.readLine()) != null) {
-
-                result.add(line);
-            }
-
-            return result;
-        }
+    protected List<String> readOrThrown0(File input, int from, int to) throws IOException, InvalidPathException {
+        return StringListPathReader.getInstance()
+                .readOrThrown(input.toPath(), from, to);
     }
 }

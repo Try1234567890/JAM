@@ -1,35 +1,25 @@
 package me.tr.trfiles.management.io.reader.file;
 
-import me.tr.trfiles.Validator;
+import me.tr.trfiles.management.io.reader.path.BytesPathReader;
 
 import java.io.File;
 import java.io.IOException;
 
-public class BytesFileReader implements FileReader<byte[]> {
+public class BytesFileReader extends FileReader<byte[]> {
+    private BytesFileReader() {
+    }
+
+    private record Holder() {
+        private static final BytesFileReader INSTANCE = new BytesFileReader();
+    }
+
+    public static BytesFileReader getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @Override
-    public byte[] readOrThrown(File file, long from, long to) throws IOException {
-        Validator.checkIf(file.isFile(), "is not a file");
-        Validator.checkIf(file.exists(), "not exists");
-        Validator.checkIf(file.canRead(), "not readable");
-
-
-        from = Math.max(from, 0);
-        to = Math.max(to, file.length());
-
-        try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
-            int len = Math.toIntExact(to - from);
-
-            fis.skip(from);
-
-            byte[] data = new byte[len];
-            int bytesRead = fis.read(data, 0, len);
-
-            if (bytesRead != data.length) {
-                throw new java.io.IOException("Cannot read all content of " + file.getPath());
-            }
-
-            return data;
-        }
+    protected byte[] readOrThrown0(File input, int from, int to) throws IOException {
+        return BytesPathReader.getInstance()
+                .readOrThrown(input.toPath(), from, to);
     }
 }

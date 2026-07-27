@@ -1,34 +1,30 @@
 package me.tr.trfiles.management.io.reader.file;
 
-import me.tr.trfiles.Validator;
+import me.tr.trfiles.management.io.reader.path.CharsPathReader;
+import me.tr.trfiles.management.io.reader.stream.CharsStreamReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-public class CharsFileReader implements FileReader<char[]> {
+public class CharsFileReader extends FileReader<char[]> {
+    private CharsFileReader() {
+    }
+
+    private record Holder() {
+        private static final CharsFileReader INSTANCE = new CharsFileReader();
+    }
+
+    public static CharsFileReader getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @Override
-    public char[] readOrThrown(File file, long from, long to) throws IOException {
-        Validator.checkIf(file.isFile(), "is not a file");
-        Validator.checkIf(file.exists(), "not exists");
-        Validator.checkIf(file.canRead(), "not readable");
-
-        from = Math.max(from, 0);
-        to = Math.max(to, file.length());
-
-        try (java.io.FileReader fis = new java.io.FileReader(file)) {
-            int len = Math.toIntExact(to - from);
-
-            fis.skip(from);
-
-            char[] data = new char[len];
-            int bytesRead = fis.read(data, 0, len);
-
-            if (bytesRead != data.length) {
-                throw new IOException("Cannot read all content of " + file.getPath());
-            }
-
-            return data;
-        }
+    protected char[] readOrThrown0(File input, int from, int to) throws IOException {
+        return CharsPathReader.getInstance()
+                .readOrThrown(input.toPath(), from, to);
     }
+
 }

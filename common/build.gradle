@@ -3,24 +3,29 @@ plugins {
     id 'maven-publish'
 }
 
+version = '0.2.0'
+var github_name = System.getenv('GITHUB_USERNAME')
+
 repositories {
-    mavenLocal()
     mavenCentral()
-}
 
-publishing {
-    publications {
-        mavenLocal(MavenPublication) {
-            from components.java
-            artifactId = 'common'
-
-            groupId = 'me.tr.trfiles'
-            version = '0.1.1'
+    repositories {
+        maven {
+            name = 'Java-Libraries'
+            url = uri('https://maven.pkg.github.com/' + github_name + '/Java-Libraries')
+            credentials {
+                username = github_name
+                password = System.getenv('GITHUB_TOKEN')
+            }
         }
     }
+
 }
 
 dependencies {
+    implementation('com.github.try:utilities:1.0.2')
+    compileOnly('org.jetbrains:annotations:24.1.0')
+
     testImplementation(platform('org.junit:junit-bom:5.11.0'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
@@ -28,4 +33,5 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    failOnNoDiscoveredTests = false
 }

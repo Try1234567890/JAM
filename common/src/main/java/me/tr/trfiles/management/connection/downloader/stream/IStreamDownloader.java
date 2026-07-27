@@ -4,6 +4,6 @@ import me.tr.trfiles.management.connection.downloader.Downloader;
 
 import java.io.OutputStream;
 
-public interface IStreamDownloader extends Downloader<OutputStream> {
+public abstract class IStreamDownloader extends Downloader<OutputStream> {
 
 }

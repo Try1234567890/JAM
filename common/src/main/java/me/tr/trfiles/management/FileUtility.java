@@ -1,12 +1,14 @@
 package me.tr.trfiles.management;
 
-import me.tr.trfiles.management.io.reader.file.FilesReader;
-import me.tr.trfiles.management.io.reader.stream.StreamsReader;
+import com.github.utilities.validators.Preconditions;
+import me.tr.trfiles.management.io.reader.Readers;
 import me.tr.trfiles.os.OSUtility;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * Utility file class for files
@@ -24,9 +26,11 @@ public class FileUtility {
      * @return Only the file name.
      */
     public static String getFileName(String path) {
-        path = path.replace('\\', '/');
-        int index = path.lastIndexOf('/');
-        return path.substring(index != -1 ? (index + 1) : 0);
+        Preconditions.parameterNotNull(path, "path");
+
+        String newPath = OSUtility.toSlash(path);
+        int index = newPath.lastIndexOf('/');
+        return newPath.substring(index != -1 ? (index + 1) : 0);
     }
 
     /**
@@ -40,8 +44,9 @@ public class FileUtility {
      * @return {@code true} if the file has an extension, otherwise {@code false}
      * @see #hasFileExtension(File)
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static boolean hasFileExtension(String name) {
+        Preconditions.parameterNotNull(name, "name");
+
         int index = name.lastIndexOf(".");
         if (index != -1) {
             try {
@@ -63,6 +68,7 @@ public class FileUtility {
      * @see #hasFileExtension(String)
      */
     public static boolean hasFileExtension(File file) {
+        Preconditions.parameterNotNull(file, "file");
         return hasFileExtension(file.getName());
     }
 
@@ -76,6 +82,7 @@ public class FileUtility {
      * @see #hasFileExtension(String)
      */
     public static boolean hasFileExtension(Path file) {
+        Preconditions.parameterNotNull(file, "file");
         return hasFileExtension(file.toFile());
     }
 
@@ -99,9 +106,16 @@ public class FileUtility {
      * @see #getFileNameWithoutExtension(File)
      */
     public static String getFileNameWithoutExtension(String name) {
-        if (!hasFileExtension(name))
-            return "";
-        return name.substring(0, (name.length() - getExtension(name).length()) - 1);
+        Preconditions.parameterNotNull(name, "name");
+        Optional<FileExtension> extension = getExtension(name);
+
+        return extension.map(
+                ext -> {
+                    String extName = ext.get();
+                    int endIndex = (name.length() - extName.length());
+                    return name.substring(0, endIndex);
+                }
+        ).orElse(name);
     }
 
     /**
@@ -125,19 +139,25 @@ public class FileUtility {
      * @see #getFileNameWithoutExtension(String)
      */
     public static String getFileNameWithoutExtension(Path file) {
+        Preconditions.parameterNotNull(file, "file");
         return getFileNameWithoutExtension(file.toFile());
     }
 
     /**
-     * Retrieve the extension file by splitting the provided
-     * fileName by {@code .} and getting last part.
+     * Retrieve the extension file if there is any.
      *
      * @param fileName File name to get extension.
-     * @return If a supported extension is found, return extension (without {@code .} at start),
-     * otherwise an empty string.
+     * @return If an extension is found, return extension otherwise an empty optional.
      */
-    public static String getExtension(String fileName) {
-        return getExtensionWithPoint(fileName).substring(1);
+    public static Optional<FileExtension> getExtension(String fileName) {
+        Preconditions.parameterNotNull(fileName, "fileName");
+        if (!hasFileExtension(fileName)) {
+            // No extension found.
+            return Optional.empty();
+        }
+        int index = fileName.lastIndexOf('.');
+        String extension = fileName.substring(index);
+        return Optional.of(new FileExtension(extension));
     }
 
     /**
@@ -147,45 +167,20 @@ public class FileUtility {
      * @param file File to get extension.
      * @return Extension got (without {@code .} at start)
      */
-    public static String getExtension(File file) {
+    public static Optional<FileExtension> getExtension(File file) {
+        Preconditions.parameterNotNull(file, "file");
         return getExtension(file.getName());
     }
 
     /**
-     * Retrieve the extension file by splitting the provided
-     * fileName by {@code .} and getting last part.
-     *
-     * @param fileName File name to get extension.
-     * @return If a supported extension is found, return extension (with {@code .} at start),
-     * otherwise an empty string.
-     */
-    public static String getExtensionWithPoint(String fileName) {
-        if (!hasFileExtension(fileName))
-            return "";
-        int index = fileName.lastIndexOf('.');
-        return fileName.substring(index);
-    }
-
-    /**
-     * Retrieve the extension file by splitting the provided
-     * fileName by {@code .} and getting last part.
-     *
-     * @param fileName File name to get extension.
-     * @return If a supported extension is found, return extension (with {@code .} at start),
-     * otherwise an empty string.
-     */
-    public static String getExtensionWithPoint(File fileName) {
-        return getExtensionWithPoint(fileName.getName());
-    }
-
-    /**
      * Retrieve the extension file by getting file name
      * e delegate to {@link #getExtension(String)}
      *
      * @param file File to get extension.
      * @return Extension got (without {@code .} at start)
      */
-    public static String getExtension(Path file) {
+    public static Optional<FileExtension> getExtension(Path file) {
+        Preconditions.parameterNotNull(file, "file");
         return getExtension(file.toFile());
     }
 
@@ -199,6 +194,7 @@ public class FileUtility {
      * @see #getPathFromString(String)
      */
     public static File getFileFromString(String path) {
+        Preconditions.parameterNotNull(path, "path");
         return new File(OSUtility.validatePath(path));
     }
 
@@ -212,6 +208,7 @@ public class FileUtility {
      * @see #getPathFromString(String)
      */
     public static Path getPathFromString(String path) {
+        Preconditions.parameterNotNull(path, "path");
         return getFileFromString(path).toPath();
     }
 
@@ -222,7 +219,8 @@ public class FileUtility {
      * @return the formatted file path.
      */
     public static String getStringPathFromFile(File file) {
-        return OSUtility.validatePath(file.toString()).replace('\\', '/');
+        Preconditions.parameterNotNull(file, "file");
+        return OSUtility.validatePath(file.toString());
     }
 
     /**
@@ -232,6 +230,7 @@ public class FileUtility {
      * @return the formatted file path.
      */
     public static String getStringPathFromPath(Path path) {
+        Preconditions.parameterNotNull(path, "path");
         return getStringPathFromFile(path.toFile());
     }
 
@@ -243,6 +242,7 @@ public class FileUtility {
      * @return {@code true} if the file is jar, otherwise {@code false}.
      */
     public static boolean isJar(InputStream is) {
+        Preconditions.parameterNotNull(is, "is");
         return (hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x03, 0x04})
                 || hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x05, 0x06})
                 || hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x07, 0x08}));
@@ -255,10 +255,27 @@ public class FileUtility {
      * @return {@code true} if the file is jar, otherwise {@code false}.
      */
     public static boolean isJar(File file) {
-        return file.isFile() && getExtension(file).equalsIgnoreCase("jar")
+        Preconditions.parameterNotNull(file, "file");
+        return file.isFile()
+                && getExtension(file).map(ext -> ext.is("jar")).orElse(false)
                 && (hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x03, 0x04})
                 || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x05, 0x06})
                 || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x07, 0x08}));
+    }
+
+    /**
+     * Checks if the provided path is a jar path.
+     *
+     * @param path The path to check for.
+     * @return {@code true} if the path is jar, otherwise {@code false}.
+     */
+    public static boolean isJar(Path path) {
+        Preconditions.parameterNotNull(path, "path");
+        return Files.isRegularFile(path)
+                && getExtension(path).map(ext -> ext.is("jar")).orElse(false)
+                && (hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x03, 0x04})
+                || hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x05, 0x06})
+                || hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x07, 0x08}));
     }
 
     /**
@@ -268,6 +285,7 @@ public class FileUtility {
      * @return {@code true} if the file is zip, otherwise {@code false}.
      */
     public static boolean isZip(InputStream is) {
+        Preconditions.parameterNotNull(is, "is");
         return (hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x03, 0x04})
                 || hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x05, 0x06})
                 || hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x07, 0x08}));
@@ -280,10 +298,42 @@ public class FileUtility {
      * @return {@code true} if the file is zip, otherwise {@code false}.
      */
     public static boolean isZip(File file) {
-        return file.isFile() && getExtension(file).equalsIgnoreCase("zip")
+        Preconditions.parameterNotNull(file, "file");
+        return file.isFile()
+                && getExtension(file).map(ext -> ext.is("zip")).orElse(false)
                 && (hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x03, 0x04})
                 || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x05, 0x06})
                 || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x07, 0x08}));
+    }
+
+    /**
+     * Checks if the provided file is a zip file.
+     *
+     * @param path The path to check for.
+     * @return {@code true} if the file is zip, otherwise {@code false}.
+     */
+    public static boolean isZip(Path path) {
+        Preconditions.parameterNotNull(path, "path");
+        return Files.isRegularFile(path)
+                && getExtension(path).map(ext -> ext.is("zip")).orElse(false)
+                && (hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x03, 0x04})
+                || hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x05, 0x06})
+                || hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x07, 0x08}));
+    }
+
+
+    /**
+     * Checks if the header of the provided path equals to the provided magic numbers.
+     *
+     * @param path         The path to read the header from.
+     * @param magicNumbers The bytes to compare with.
+     * @return {@code true} if the header equals with the provided bytes.
+     */
+    public static boolean hasMagicNumber(Path path, byte[] magicNumbers) {
+        Preconditions.parameterNotNull(path, "path");
+        Preconditions.parameterNotNull(magicNumbers, "magicNumbers");
+        byte[] readBytes = Readers.getBytesPathReader().readOrDefault(path, 0, 32, new byte[0]);
+        return matches(readBytes, magicNumbers);
     }
 
     /**
@@ -294,8 +344,11 @@ public class FileUtility {
      * @return {@code true} if the header equals with the provided bytes.
      */
     public static boolean hasMagicNumber(File file, byte[] magicNumbers) {
-        byte[] readBytes = FilesReader.readAsBytesOrDefault(file, 0, 32, new byte[0]);
-        return matchesMagic(readBytes, magicNumbers);
+        Preconditions.parameterNotNull(file, "file");
+        Preconditions.parameterNotNull(magicNumbers, "magicNumbers");
+
+        byte[] readBytes = Readers.getBytesFileReader().readOrDefault(file, 0, 32, new byte[0]);
+        return matches(readBytes, magicNumbers);
     }
 
     /**
@@ -306,11 +359,17 @@ public class FileUtility {
      * @return {@code true} if the header equals with the provided bytes.
      */
     public static boolean hasMagicNumber(InputStream is, byte[] magicNumbers) {
-        byte[] readBytes = StreamsReader.readAsBytesOrDefault(is, 0, 32, new byte[0]);
-        return matchesMagic(readBytes, magicNumbers);
+        Preconditions.parameterNotNull(is, "is");
+        Preconditions.parameterNotNull(magicNumbers, "magicNumbers");
+
+        byte[] readBytes = Readers.getBytesStreamReader().readOrDefault(is, 0, 32, new byte[0]);
+        return matches(readBytes, magicNumbers);
     }
 
-    public static boolean matchesMagic(byte[] header, byte[] magic) {
+    public static boolean matches(byte[] header, byte[] magic) {
+        Preconditions.parameterNotNull(header, "header");
+        Preconditions.parameterNotNull(magic, "magic");
+
         if (header.length < magic.length) return false;
         for (int i = 0; i < magic.length; i++) {
             if (header[i] != magic[i]) return false;

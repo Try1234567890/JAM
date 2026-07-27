@@ -1,26 +1,36 @@
 package me.tr.trfiles.management.connection.uploader.stream;
 
-import java.io.*;
+import me.tr.trfiles.Utility;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class ParallelStreamUploader implements IStreamUploader {
+public class ParallelStreamUploader extends IStreamUploader {
     private static final int CHUNK_SIZE = 1024 * 1024; // 1MB
-    private final int threadCount;
 
-    public ParallelStreamUploader(int threadCount) {
-        this.threadCount = threadCount;
+    private ParallelStreamUploader() {
     }
 
-    public ParallelStreamUploader() {
-        this(Runtime.getRuntime().availableProcessors());
+    private record Holder() {
+        private static final ParallelStreamUploader INSTANCE = new ParallelStreamUploader();
+    }
+
+    public static ParallelStreamUploader getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override
-    public void uploadOrThrown(InputStream source, URL url) throws IOException {
+    public void uploadOrThrown(URL url, InputStream source) throws IOException {
+        uploadOrThrown(source, url, Utility.THREADS_AMOUNT);
+    }
+
+    public void uploadOrThrown(InputStream source, URL url, int threadCount) throws IOException {
         Semaphore semaphore = new Semaphore(threadCount * 2);
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         List<CompletableFuture<Void>> futures = new ArrayList<>();

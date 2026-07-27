@@ -3,24 +3,30 @@ package me.tr.trfiles.management.io.reader.stream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
-public class StringStreamReader implements ISReader<String> {
+public class StringStreamReader extends StreamReader<String> {
+    private StringStreamReader() {
+    }
+
+    private record Holder() {
+        private static final StringStreamReader INSTANCE = new StringStreamReader();
+    }
+
+    public static StringStreamReader getInstance() {
+        return Holder.INSTANCE;
+    }
+
 
     @Override
-    public String readOrThrown(InputStream is, long from, long to) throws IOException {
-
-        if (from > to) {
-            throw new IOException("from is major than to");
-        }
-
-        from = Math.max(from, 0);
-        to = Math.max(to, is.available());
-
-        try (BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(is))) {
+    protected String readOrThrown0(InputStream input, int from, int to) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
             StringBuilder sb = new StringBuilder();
             int i = 0;
             String line;
-            while ((i > to || i < from) && (line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
+                if (i < from) continue;
+                if (i >= to) break;
                 sb.append(line).append("\n");
                 i++;
             }

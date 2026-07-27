@@ -10,6 +10,6 @@ public class UnknownImplementationException extends RuntimeException {
     }
 
     public UnknownImplementationException(File file) {
-        super("The implementation of " + FileUtility.getExtension(file) + " is not recognized or not supported.");
+        super("The implementation of " + FileUtility.getExtension(file) + " is not recognized. If you implemented it, please make sure to register it inside the ConfigurationRegistry with ConfigurationRegistry#newConfiguration(FileConfiguration).");
     }
 }

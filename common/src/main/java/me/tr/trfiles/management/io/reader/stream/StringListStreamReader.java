@@ -4,16 +4,23 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StringListStreamReader implements ISReader<List<String>> {
+public class StringListStreamReader extends StreamReader<List<String>> {
+    private StringListStreamReader() {
+    }
+
+    private record Holder() {
+        private static final StringListStreamReader INSTANCE = new StringListStreamReader();
+    }
+
+    public static StringListStreamReader getInstance() {
+        return Holder.INSTANCE;
+    }
+
 
     @Override
-    public List<String> readOrThrown(InputStream is, long from, long to) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(is))) {
+    protected List<String> readOrThrown0(InputStream input, int from, int to) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
             List<String> result = new ArrayList<>();
-
-
-            from = Math.max(from, 0);
-            to = Math.max(to, is.available());
 
             int i = 0;
             String line;

@@ -1,116 +1,186 @@
 package me.tr.trfiles.management.io.writer;
 
-import me.tr.trfiles.management.io.writer.file.FilesWriter;
-import me.tr.trfiles.management.io.writer.stream.OSsWriter;
-import me.tr.trfiles.management.io.writer.streaming.Streamings;
+
+import com.github.utilities.validators.Preconditions;
+import me.tr.trfiles.management.io.writer.file.*;
+import me.tr.trfiles.management.io.writer.path.*;
+import me.tr.trfiles.management.io.writer.stream.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 public class Writers {
-
     private Writers() {
     }
 
-    public static void writeOrThrown(InputStream from, OutputStream destination) throws IOException {
-        Streamings.writeOrThrown(from, destination);
+    public static InstanceWriter<byte[], File> newBytesWriter(String path) {
+        return new InstanceWriter<>(new File(Preconditions.parameterNotNull(path, "path")), BytesToFileWriter.getInstance());
     }
 
-    public static void writeOrThrown(File from, OutputStream destination) throws IOException {
-        Streamings.writeOrThrown(from, destination);
+    public static InstanceWriter<char[], File> newCharsWriter(String path) {
+        return new InstanceWriter<>(new File(Preconditions.parameterNotNull(path, "path")), CharsToFileWriter.getInstance());
     }
 
-    public static void writeOrThrown(File from, File destination) throws IOException {
-        Streamings.writeOrThrown(from, destination);
+    public static InstanceWriter<InputStream, File> newStreamWriter(String path) {
+        return new InstanceWriter<>(new File(Preconditions.parameterNotNull(path, "path")), StreamToFileWriter.getInstance());
     }
 
-    public static void writeOrThrown(InputStream from, File destination) throws IOException {
-        Streamings.writeOrThrown(from, destination);
+    public static InstanceWriter<String[], File> newStringArrayWriter(String path) {
+        return new InstanceWriter<>(new File(Preconditions.parameterNotNull(path, "path")), StringArrayToFileWriter.getInstance());
     }
 
-
-    public static void write(InputStream from, OutputStream destination) {
-        Streamings.write(from, destination);
+    public static InstanceWriter<List<String>, File> newStringListWriter(String path) {
+        return new InstanceWriter<>(new File(Preconditions.parameterNotNull(path, "path")), StringListToFileWriter.getInstance());
     }
 
-    public static void write(File from, OutputStream destination) {
-        Streamings.write(from, destination);
+    public static InstanceWriter<String, File> newStringWriter(String path) {
+        return new InstanceWriter<>(new File(Preconditions.parameterNotNull(path, "path")), StringToFileWriter.getInstance());
     }
 
-    public static void write(File from, File destination) {
-        Streamings.write(from, destination);
-
+    public static InstanceWriter<byte[], File> newBytesWriter(File path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), BytesToFileWriter.getInstance());
     }
 
-    public static void write(InputStream from, File destination) {
-        Streamings.write(from, destination);
+    public static InstanceWriter<char[], File> newCharsWriter(File path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), CharsToFileWriter.getInstance());
     }
 
-    public static void writerBytesOrThrown(File file, byte[] bytes) throws IOException {
-        FilesWriter.writerBytesOrThrown(file, bytes);
+    public static InstanceWriter<InputStream, File> newStreamWriter(File path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StreamToFileWriter.getInstance());
     }
 
-    public static void writerBytes(File file, byte[] bytes) {
-        FilesWriter.writerBytes(file, bytes);
+    public static InstanceWriter<String[], File> newStringArrayWriter(File path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringArrayToFileWriter.getInstance());
     }
 
-    public static void writerCharsOrThrown(File file, char[] chars) throws IOException {
-        FilesWriter.writerCharsOrThrown(file, chars);
+    public static InstanceWriter<List<String>, File> newStringListWriter(File path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringListToFileWriter.getInstance());
     }
 
-    public static void writerChars(File file, char[] chars) {
-        FilesWriter.writerChars(file, chars);
+    public static InstanceWriter<String, File> newStringWriter(File path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringToFileWriter.getInstance());
     }
 
-    public static void writerStringOrThrown(File file, String string) throws IOException {
-        FilesWriter.writerStringOrThrown(file, string);
+    public static InstanceWriter<byte[], Path> newBytesWriter(Path path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), BytesToPathWriter.getInstance());
     }
 
-    public static void writerString(File file, String string) {
-        FilesWriter.writerString(file, string);
+    public static InstanceWriter<char[], Path> newCharsWriter(Path path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), CharsToPathWriter.getInstance());
     }
 
-    public static void writerStringListOrThrown(File file, List<String> strings) throws IOException {
-        FilesWriter.writerStringListOrThrown(file, strings);
+    public static InstanceWriter<InputStream, Path> newStreamWriter(Path path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StreamToPathWriter.getInstance());
     }
 
-    public static void writerStringList(File file, List<String> strings) {
-        FilesWriter.writerStringList(file, strings);
+    public static InstanceWriter<String[], Path> newStringArrayWriter(Path path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringArrayToPathWriter.getInstance());
     }
 
-
-    public static void writerBytesOrThrown(OutputStream os, byte[] bytes) throws IOException {
-        OSsWriter.writerBytesOrThrown(os, bytes);
+    public static InstanceWriter<List<String>, Path> newStringListWriter(Path path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringListToPathWriter.getInstance());
     }
 
-    public static void writerBytes(OutputStream os, byte[] bytes) {
-        OSsWriter.writerBytes(os, bytes);
+    public static InstanceWriter<String, Path> newStringWriter(Path path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringToPathWriter.getInstance());
     }
 
-    public static void writerCharsOrThrown(OutputStream os, char[] chars) throws IOException {
-        OSsWriter.writerCharsOrThrown(os, chars);
+    public static InstanceWriter<byte[], OutputStream> newBytesWriter(OutputStream path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), BytesToStreamWriter.getInstance());
     }
 
-    public static void writerChars(OutputStream os, char[] chars) {
-        OSsWriter.writerChars(os, chars);
+    public static InstanceWriter<char[], OutputStream> newCharsWriter(OutputStream path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), CharsToStreamWriter.getInstance());
     }
 
-    public static void writerStringOrThrown(OutputStream os, String string) throws IOException {
-        OSsWriter.writerStringOrThrown(os, string);
+    public static InstanceWriter<InputStream, OutputStream> newStreamWriter(OutputStream path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StreamToStreamWriter.getInstance());
     }
 
-    public static void writerString(OutputStream os, String string) {
-        OSsWriter.writerString(os, string);
+    public static InstanceWriter<String[], OutputStream> newStringArrayWriter(OutputStream path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringArrayToStreamWriter.getInstance());
     }
 
-    public static void writerStringListOrThrown(OutputStream os, List<String> strings) throws IOException {
-        OSsWriter.writerStringListOrThrown(os, strings);
+    public static InstanceWriter<List<String>, OutputStream> newStringListWriter(OutputStream path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringListToStreamWriter.getInstance());
     }
 
-    public static void writerStringList(OutputStream os, List<String> strings) {
-        OSsWriter.writerStringList(os, strings);
+    public static InstanceWriter<String, OutputStream> newStringWriter(OutputStream path) {
+        return new InstanceWriter<>(Preconditions.parameterNotNull(path, "path"), StringToStreamWriter.getInstance());
+    }
+
+    public static BytesToFileWriter getBytesToFileWriter() {
+        return BytesToFileWriter.getInstance();
+    }
+
+    public static CharsToFileWriter getCharsToFileWriter() {
+        return CharsToFileWriter.getInstance();
+    }
+
+    public static StreamToFileWriter getStreamToFileWriter() {
+        return StreamToFileWriter.getInstance();
+    }
+
+    public static StringArrayToFileWriter getStringArrayToFileWriter() {
+        return StringArrayToFileWriter.getInstance();
+    }
+
+    public static StringListToFileWriter getStringListToFileWriter() {
+        return StringListToFileWriter.getInstance();
+    }
+
+    public static StringToFileWriter getStringToFileWriter() {
+        return StringToFileWriter.getInstance();
+    }
+
+    public static BytesToPathWriter getBytesToPathWriter() {
+        return BytesToPathWriter.getInstance();
+    }
+
+    public static CharsToPathWriter getCharsToPathWriter() {
+        return CharsToPathWriter.getInstance();
+    }
+
+    public static StreamToPathWriter getStreamToPathWriter() {
+        return StreamToPathWriter.getInstance();
+    }
+
+    public static StringArrayToPathWriter getStringArrayToPathWriter() {
+        return StringArrayToPathWriter.getInstance();
+    }
+
+    public static StringListToPathWriter getStringListToPathWriter() {
+        return StringListToPathWriter.getInstance();
+    }
+
+    public static StringToPathWriter getStringToPathWriter() {
+        return StringToPathWriter.getInstance();
+    }
+
+    public static BytesToStreamWriter getBytesToStreamWriter() {
+        return BytesToStreamWriter.getInstance();
+    }
+
+    public static CharsToStreamWriter getCharsToStreamWriter() {
+        return CharsToStreamWriter.getInstance();
+    }
+
+    public static StreamToStreamWriter getStreamToStreamWriter() {
+        return StreamToStreamWriter.getInstance();
+    }
+
+    public static StringArrayToStreamWriter getStringArrayToStreamWriter() {
+        return StringArrayToStreamWriter.getInstance();
+    }
+
+    public static StringListToStreamWriter getStringListToStreamWriter() {
+        return StringListToStreamWriter.getInstance();
+    }
+
+    public static StringToStreamWriter getStringToStreamWriter() {
+        return StringToStreamWriter.getInstance();
     }
 }
