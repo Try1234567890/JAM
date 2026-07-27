@@ -1,0 +1,15 @@
+package com.github.trfiles.exceptions;
+
+import com.github.trfiles.management.FileUtility;
+
+import java.io.File;
+
+public class UnknownImplementationException extends RuntimeException {
+    public UnknownImplementationException(String message) {
+        super(message);
+    }
+
+    public UnknownImplementationException(File file) {
+        super("The implementation of " + FileUtility.getExtension(file) + " is not recognized. If you implemented it, please make sure to register it inside the ConfigurationRegistry with ConfigurationRegistry#newConfiguration(FileConfiguration).");
+    }
+}

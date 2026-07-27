@@ -1,54 +1,35 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'com.gradleup.shadow' version '9.3.1'
 }
+
+
+version = '5.0.0'
+
+var github_name = System.getenv('GITHUB_USERNAME')
 
 repositories {
-    mavenLocal()
     mavenCentral()
-}
-
-dependencies {
-    implementation("me.tr.trfiles:common:0.1.1")
-
-    implementation('org.yaml:snakeyaml:2.3')
-    implementation('com.google.code.gson:gson:2.11.0')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.2')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.18.2')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-properties:2.18.2')
-    implementation('dev.toonformat:jtoon:1.0.8')
-
-    testImplementation(platform('org.junit:junit-bom:5.11.0'))
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
-}
-
-shadowJar {
-    archiveClassifier.set('')
-
-    relocate 'org.yaml.snakeyaml', 'me.tr.trfiles.libs.snakeyaml'
-    relocate 'com.google.gson', 'me.tr.trfiles.libs.gson'
-    relocate 'com.fasterxml.jackson', 'me.tr.trfiles.libs.jackson'
-    relocate 'dev.toonformat.jtoon', 'me.tr.trfiles.libs.jtoon'
-
-    exclude 'META-INF/maven/**'
-    exclude 'META-INF/LICENSE*'
-}
-
-publishing {
-    publications {
-        mavenLocal(MavenPublication) {
-            from components.shadow
-
-            artifactId = 'files'
-
-            groupId = 'me.tr.trfiles'
-            version = '4.0.3'
+    maven {
+        name = 'Java-Libraries'
+        url = uri('https://maven.pkg.github.com/' + github_name + '/Java-Libraries')
+        credentials {
+            username = github_name
+            password = System.getenv('GITHUB_TOKEN')
         }
     }
 }
 
-test {
-    useJUnitPlatform()
+
+dependencies {
+    implementation('com.github.try.jam:common:0.2.2')
+    implementation('org.yaml:snakeyaml:2.6')
+    implementation('com.google.code.gson:gson:2.14.0')
+    implementation('tools.jackson.dataformat:jackson-dataformat-xml:3.2.1')
+    implementation('tools.jackson.dataformat:jackson-dataformat-toml:3.2.1')
+    implementation('tools.jackson.dataformat:jackson-dataformat-properties:3.2.1')
+
+    testImplementation(platform('org.junit:junit-bom:5.11.0'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }

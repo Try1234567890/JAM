@@ -3,12 +3,11 @@ plugins {
     id 'maven-publish'
 }
 
-version = '0.2.0'
+version = '0.2.2'
 var github_name = System.getenv('GITHUB_USERNAME')
 
 repositories {
     mavenCentral()
-
     repositories {
         maven {
             name = 'Java-Libraries'
@@ -19,11 +18,10 @@ repositories {
             }
         }
     }
-
 }
 
 dependencies {
-    implementation('com.github.try:utilities:1.0.2')
+    implementation('com.github.try:utilities:1.0.3')
     compileOnly('org.jetbrains:annotations:24.1.0')
 
     testImplementation(platform('org.junit:junit-bom:5.11.0'))
