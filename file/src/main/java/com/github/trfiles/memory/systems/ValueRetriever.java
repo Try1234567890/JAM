@@ -1,6 +1,7 @@
 package com.github.trfiles.memory.systems;
 
 import com.github.trfiles.Section;
+import com.github.trfiles.exceptions.UnexpectedValueType;
 import com.github.trfiles.memory.systems.converter.values.Converters;
 
 import java.math.BigDecimal;
@@ -205,10 +206,27 @@ public class ValueRetriever {
         return get(new ValueKey<>(path, Converters.SECTION_LIST_CONVERTER));
     }
 
+    /**
+     * Retrieve the value at {@code path} inside the configuration as a set of sections.
+     * <p>
+     *
+     *
+     * @param path the path to the value
+     * @return the {@link ValueEntry} found at the {@code key}
+     * @throws UnexpectedValueType if any non-section value is found before reaching the value-key.
+     */
     public ValueEntry<Set<Section>> asSectionSet(String path) {
         return get(new ValueKey<>(path, Converters.SECTION_SET_CONVERTER));
     }
 
+    /**
+     * Retrieve the value using the {@code key}.
+     *
+     * @param key the {@link ValueKey} to use
+     * @param <T> The expected value type
+     * @return the {@link ValueEntry} found at the {@code key}
+     * @throws UnexpectedValueType if any non-section value is found before reaching the value-key.
+     */
     public <T> ValueEntry<T> get(ValueKey<T> key) {
         return section.get(key);
     }
