@@ -27,14 +27,23 @@ public class JsonConfiguration extends FileConfiguration {
     }
 
     @Override
-    protected FileConfiguration parseContent(String content) throws InvalidConfigurationException {
+    protected void parseContent(String content) throws InvalidConfigurationException {
         try {
             Map<?, ?> map = gson.fromJson(content, Map.class);
             withValues(toSections.convert(map));
         } catch (Throwable throwable) {
             throw new InvalidConfigurationException("An error occurs while loading JSON configuration from " + getPath(), throwable);
         }
-        return this;
+    }
+
+    @Override
+    protected String dumpContent() {
+        try {
+            Map<String, Object> map = toMaps.convert();
+            return gson.toJson(map);
+        } catch (Throwable e) {
+            throw new RuntimeException("An error occurs while dumping the JSON configuration.", e);
+        }
     }
 
     @Override

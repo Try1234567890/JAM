@@ -37,14 +37,23 @@ public class YamlConfiguration extends FileConfiguration {
 
 
     @Override
-    protected YamlConfiguration parseContent(String content) throws InvalidConfigurationException {
+    protected void parseContent(String content) throws InvalidConfigurationException {
         try {
             Map<?, ?> map = yaml.loadAs(content, Map.class);
             withValues(toSections.convert(map));
         } catch (Throwable e) {
             throw new InvalidConfigurationException("An error occurs while loading the YAML configuration.", e);
         }
-        return this;
+    }
+
+    @Override
+    protected String dumpContent() {
+        try {
+            Map<String, Object> map = toMaps.convert();
+            return yaml.dump(map);
+        } catch (Throwable e) {
+            throw new RuntimeException("An error occurs while dumping the YAML configuration.", e);
+        }
     }
 
     @Override

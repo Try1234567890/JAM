@@ -31,17 +31,26 @@ public class XmlConfiguration extends FileConfiguration {
     }
 
     @Override
-    protected FileConfiguration parseContent(String content) throws InvalidConfigurationException {
+    protected void parseContent(String content) throws InvalidConfigurationException {
         try {
-            Map<?, ?> map = mapper.reader()
+            Map<?, ?> map = mapper
+                    .readerFor(Map.class)
                     .withRootName(getOptions().ROOT_ELEMENT_NAME.get())
-                    .forType(Map.class)
                     .readValue(content);
             withValues(toSections.convert(map));
         } catch (Throwable throwable) {
             throw new InvalidConfigurationException("An error occurs while loading XML configuration from " + getPath(), throwable);
         }
-        return this;
+    }
+
+    @Override
+    protected String dumpContent() {
+        try {
+            Map<String, Object> map = toMaps.convert();
+            return mapper.writer().writeValueAsString(map);
+        } catch (Throwable e) {
+            throw new RuntimeException("An error occurs while dumping the XML configuration.", e);
+        }
     }
 
     @Override

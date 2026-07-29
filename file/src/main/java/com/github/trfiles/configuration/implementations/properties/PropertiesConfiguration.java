@@ -30,14 +30,23 @@ public class PropertiesConfiguration extends FileConfiguration {
     }
 
     @Override
-    protected FileConfiguration parseContent(String content) throws InvalidConfigurationException {
+    protected void parseContent(String content) throws InvalidConfigurationException {
         try {
             Map<?, ?> map = mapper.readValue(content, Map.class);
             withValues(toSections.convert(map));
         } catch (Throwable throwable) {
             throw new InvalidConfigurationException("An error occurs while loading Properties  configuration from " + getPath(), throwable);
         }
-        return this;
+    }
+
+    @Override
+    protected String dumpContent() {
+        try {
+            Map<String, Object> map = toMaps.convert();
+            return mapper.writer().writeValueAsString(map);
+        } catch (Throwable e) {
+            throw new RuntimeException("An error occurs while dumping the Properties configuration.", e);
+        }
     }
 
     @Override
