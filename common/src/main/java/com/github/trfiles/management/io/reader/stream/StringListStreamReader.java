@@ -24,7 +24,7 @@ public class StringListStreamReader extends StreamReader<List<String>> {
 
             int i = 0;
             String line;
-            while ((i > to || i < from) && (line = reader.readLine()) != null) {
+            while ((i >= from && i < to) && (line = reader.readLine()) != null) {
                 result.add(line);
                 i++;
             }
