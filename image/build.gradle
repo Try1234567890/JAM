@@ -4,18 +4,6 @@ plugins {
 }
 
 
-var github_name = System.getenv('GITHUB_USERNAME')
-
-repositories {
-    maven {
-        name = 'Java-Libraries'
-        url = uri('https://maven.pkg.github.com/' + github_name + '/Java-Libraries')
-        credentials {
-            username = github_name
-            password = System.getenv('GITHUB_TOKEN')
-        }
-    }
-}
 
 
 dependencies {

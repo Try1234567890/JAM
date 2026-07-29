@@ -4,21 +4,6 @@ plugins {
 }
 
 version = '0.2.6'
-var github_name = System.getenv('GITHUB_USERNAME')
-
-repositories {
-    mavenCentral()
-    repositories {
-        maven {
-            name = 'Java-Libraries'
-            url = uri('https://maven.pkg.github.com/' + github_name + '/Java-Libraries')
-            credentials {
-                username = github_name
-                password = System.getenv('GITHUB_TOKEN')
-            }
-        }
-    }
-}
 
 dependencies {
     compileOnly('com.github.try:utilities:1.0.6')
