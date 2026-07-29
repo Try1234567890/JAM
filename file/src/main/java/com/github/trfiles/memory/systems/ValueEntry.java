@@ -1,7 +1,6 @@
 package com.github.trfiles.memory.systems;
 
 
-
 import com.github.trfiles.exceptions.UnexpectedValueType;
 
 import java.util.Optional;
@@ -40,11 +39,7 @@ public class ValueEntry<T> {
     }
 
     public T getOrThrown(Throwable throwable) {
-        return get().orElseThrow(() -> toUVT(throwable));
-    }
-
-    private UnexpectedValueType toUVT(Throwable t) {
-        return t instanceof UnexpectedValueType uvt ? uvt : new UnexpectedValueType(t);
+        return get().orElseThrow(() -> throwable instanceof UnexpectedValueType uvt ? uvt : new UnexpectedValueType(throwable));
     }
 
     public T def() {
@@ -53,12 +48,9 @@ public class ValueEntry<T> {
 
     @Override
     public String toString() {
-        return isPresent
-                ? (value != null)
-                  ? value.toString()
-                  : (def != null)
-                    ? def.toString()
-                    : "[NONE]"
-                : "[NONE]";
+        if (!isPresent) return "[NONE]";
+        else if (value != null) return value.toString();
+        else if (def != null) return def.toString();
+        else return "[NONE]";
     }
 }

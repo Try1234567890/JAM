@@ -2,6 +2,8 @@ package com.github.trfiles.memory.systems.converter.values;
 
 import com.github.trfiles.Section;
 import com.github.utilities.registries.Registry;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -68,8 +70,9 @@ public class Converters extends Registry<Class<?>, Converter<?>> {
     public static final Converter<Double[]> DOUBLE_ARRAY_CONVERTER = new ArrayConverter<>(DOUBLE_CONVERTER, Double[]::new);
     public static final Converter<List<Double>> DOUBLE_LIST_CONVERTER = new CollectionConverter<>(DOUBLE_CONVERTER, ArrayList::new);
     public static final Converter<Set<Double>> DOUBLE_SET_CONVERTER = new CollectionConverter<>(DOUBLE_CONVERTER, HashSet::new);
+
     @SuppressWarnings("unchecked")
-    public static <T> Converter<T> typeConverter(Class<T> type) {
+    public static <T> @NotNull Converter<T> typeConverter(Class<T> type) {
         return (obj) -> {
             if (obj != null &&
                     type.isAssignableFrom(obj.getClass()))
@@ -82,7 +85,7 @@ public class Converters extends Registry<Class<?>, Converter<?>> {
     private Converters() {
     }
 
-    private record Holder() {
+    private static final class Holder {
         private static final Converters INSTANCE = new Converters();
     }
 

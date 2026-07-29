@@ -14,7 +14,7 @@ import java.util.Set;
 public interface ConfigurationEntry {
 
     /**
-     * Create a new instance the {@link FileConfiguration} that this entry represents.
+     * Create a new instance of the {@link FileConfiguration} that this entry represents.
      *
      * @param path The path to create the instance for.
      * @return The new instance.

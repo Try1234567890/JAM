@@ -165,7 +165,7 @@ public class MemorySection implements Section {
      */
     @Override
     public <T> ValueEntry<T> set(String path, T value) {
-        PathSearchValue searchValue = getSectionAndKey(path);
+        KeyedSection searchValue = getSectionAndKey(path);
         Section current = searchValue.section();
         String key = searchValue.key();
 
@@ -202,7 +202,7 @@ public class MemorySection implements Section {
      */
     @Override
     public Section newSection(String path, Map<?, ?> values) {
-        PathSearchValue searchValue = getSectionAndKey(path);
+        KeyedSection searchValue = getSectionAndKey(path);
         Section current = searchValue.section();
         String key = searchValue.key();
 
@@ -221,7 +221,7 @@ public class MemorySection implements Section {
      * @param path The path.
      * @return An object containing the section and key.
      */
-    private PathSearchValue getSectionAndKey(String path) {
+    private KeyedSection getSectionAndKey(String path) {
         char separator = getRoot().getOptions().PATH_SEPARATOR.get();
         Section current = this;
         int i1 = -1, i2;
@@ -238,7 +238,7 @@ public class MemorySection implements Section {
         }
         String key = path.substring(i2);
 
-        return new PathSearchValue(current, key);
+        return new KeyedSection(current, key);
     }
 
     @Override
@@ -302,7 +302,7 @@ public class MemorySection implements Section {
      * @param section The parent section of the {@code key}
      * @param key     The key that was searched.
      */
-    private record PathSearchValue(Section section, String key) {
+    private record KeyedSection(Section section, String key) {
     }
 }
 

@@ -20,9 +20,8 @@ repositories {
     }
 }
 
-
 dependencies {
-    implementation('com.github.try.jam:common:0.2.2')
+    implementation('com.github.try.jam:common:0.2.5')
     implementation('org.yaml:snakeyaml:2.6')
     implementation('com.google.code.gson:gson:2.14.0')
     implementation('tools.jackson.dataformat:jackson-dataformat-xml:3.2.1')

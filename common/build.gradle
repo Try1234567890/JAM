@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-version = '0.2.2'
+version = '0.2.6'
 var github_name = System.getenv('GITHUB_USERNAME')
 
 repositories {
@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    implementation('com.github.try:utilities:1.0.3')
+    compileOnly('com.github.try:utilities:1.0.6')
     compileOnly('org.jetbrains:annotations:24.1.0')
 
     testImplementation(platform('org.junit:junit-bom:5.11.0'))

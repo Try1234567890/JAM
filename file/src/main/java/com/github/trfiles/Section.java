@@ -15,7 +15,7 @@ import java.util.Map;
  * Internally, a {@code Section} is backed by a {@code Map<String, Object>}, where the {@link String}
  * keys act as identifiers used to retrieve the associated values.
  * </p>
- * <h3>Example: Named Sections</h3>
+ * <h2>Example: Named Sections</h2>
  * In the following JSON configuration, the {@code "meta"} key maps to a nested object,
  * which is represented as a {@link Section}:
  * <pre>
@@ -37,7 +37,6 @@ import java.util.Map;
  * To handle this, they are represented as standalone {@link Configuration} instances instead of {@link Section}s.
  * <p>
  * For example, consider this JSON structure:
- * </pre>
  * <pre>
  * {@code
  * {
