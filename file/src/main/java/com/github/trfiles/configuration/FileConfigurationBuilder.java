@@ -21,7 +21,7 @@ public class FileConfigurationBuilder {
     private String content = "";
 
     public FileConfigurationBuilder(ConfigurationEntry entry) {
-        this.entry = Preconditions.parameterNotNull(entry, "entry");
+        this.entry = Preconditions.simpleParameterNotNull(entry, "entry");
     }
 
     protected Path getPath() {

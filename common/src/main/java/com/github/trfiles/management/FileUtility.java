@@ -1,10 +1,12 @@
 package com.github.trfiles.management;
 
+import com.github.trfiles.management.io.readers.limited.fromStream.LimitedStreamReaderAsBytes;
+import com.github.trfiles.management.managers.FileManager;
+import com.github.trfiles.os.OS;
 import com.github.utilities.validators.Preconditions;
-import com.github.trfiles.management.io.reader.Readers;
-import com.github.trfiles.os.OSUtility;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,10 +28,10 @@ public class FileUtility {
      * @return Only the file name.
      */
     public static String getFileName(String path) {
-        Preconditions.parameterNotNull(path, "path");
+        Preconditions.parameterNotNull(path, "path", "Path cannot be null or empty");
 
-        String newPath = OSUtility.toSlash(path);
-        int index = newPath.lastIndexOf('/');
+        String newPath = OS.validatePath(path);
+        int index = newPath.lastIndexOf(OS.pathSeparator());
         return newPath.substring(index != -1 ? (index + 1) : 0);
     }
 
@@ -50,6 +52,7 @@ public class FileUtility {
         int index = name.lastIndexOf(".");
         if (index != -1) {
             try {
+                //noinspection ResultOfMethodCallIgnored
                 name.charAt(index + 1);
                 return true;
             } catch (IndexOutOfBoundsException ignored) {
@@ -195,7 +198,7 @@ public class FileUtility {
      */
     public static File getFileFromString(String path) {
         Preconditions.parameterNotNull(path, "path");
-        return new File(OSUtility.validatePath(path));
+        return new File(OS.validatePath(path));
     }
 
     /**
@@ -220,7 +223,7 @@ public class FileUtility {
      */
     public static String getStringPathFromFile(File file) {
         Preconditions.parameterNotNull(file, "file");
-        return OSUtility.validatePath(file.toString());
+        return OS.validatePath(file.toString());
     }
 
     /**
@@ -254,7 +257,7 @@ public class FileUtility {
      * @param file The file to check for.
      * @return {@code true} if the file is jar, otherwise {@code false}.
      */
-    public static boolean isJar(File file) {
+    public static boolean isJar(File file) throws IOException {
         Preconditions.parameterNotNull(file, "file");
         return file.isFile()
                 && getExtension(file).map(ext -> ext.is("jar")).orElse(false)
@@ -269,7 +272,7 @@ public class FileUtility {
      * @param path The path to check for.
      * @return {@code true} if the path is jar, otherwise {@code false}.
      */
-    public static boolean isJar(Path path) {
+    public static boolean isJar(Path path) throws IOException {
         Preconditions.parameterNotNull(path, "path");
         return Files.isRegularFile(path)
                 && getExtension(path).map(ext -> ext.is("jar")).orElse(false)
@@ -279,25 +282,12 @@ public class FileUtility {
     }
 
     /**
-     * Checks if the provided input stream is a zip file.
-     *
-     * @param is The input stream to check for.
-     * @return {@code true} if the file is zip, otherwise {@code false}.
-     */
-    public static boolean isZip(InputStream is) {
-        Preconditions.parameterNotNull(is, "is");
-        return (hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x03, 0x04})
-                || hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x05, 0x06})
-                || hasMagicNumber(is, new byte[]{0x50, 0x4B, 0x07, 0x08}));
-    }
-
-    /**
      * Checks if the provided file is a zip file.
      *
      * @param file The file to check for.
      * @return {@code true} if the file is zip, otherwise {@code false}.
      */
-    public static boolean isZip(File file) {
+    public static boolean isZip(File file) throws IOException {
         Preconditions.parameterNotNull(file, "file");
         return file.isFile()
                 && getExtension(file).map(ext -> ext.is("zip")).orElse(false)
@@ -312,13 +302,24 @@ public class FileUtility {
      * @param path The path to check for.
      * @return {@code true} if the file is zip, otherwise {@code false}.
      */
-    public static boolean isZip(Path path) {
+    public static boolean isZip(Path path) throws IOException {
         Preconditions.parameterNotNull(path, "path");
         return Files.isRegularFile(path)
                 && getExtension(path).map(ext -> ext.is("zip")).orElse(false)
                 && (hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x03, 0x04})
                 || hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x05, 0x06})
                 || hasMagicNumber(path, new byte[]{0x50, 0x4B, 0x07, 0x08}));
+    }
+
+    /**
+     * Checks if the header of the provided file equals to the provided magic numbers.
+     *
+     * @param file         The file to read the header from.
+     * @param magicNumbers The bytes to compare with.
+     * @return {@code true} if the header equals with the provided bytes.
+     */
+    public static boolean hasMagicNumber(File file, byte[] magicNumbers) throws IOException {
+        return hasMagicNumber(file.toPath(), magicNumbers);
     }
 
 
@@ -329,26 +330,8 @@ public class FileUtility {
      * @param magicNumbers The bytes to compare with.
      * @return {@code true} if the header equals with the provided bytes.
      */
-    public static boolean hasMagicNumber(Path path, byte[] magicNumbers) {
-        Preconditions.parameterNotNull(path, "path");
-        Preconditions.parameterNotNull(magicNumbers, "magicNumbers");
-        byte[] readBytes = Readers.getBytesPathReader().readOrDefault(path, 0, 32, new byte[0]);
-        return matches(readBytes, magicNumbers);
-    }
-
-    /**
-     * Checks if the header of the provided file equals to the provided magic numbers.
-     *
-     * @param file         The file to read the header from.
-     * @param magicNumbers The bytes to compare with.
-     * @return {@code true} if the header equals with the provided bytes.
-     */
-    public static boolean hasMagicNumber(File file, byte[] magicNumbers) {
-        Preconditions.parameterNotNull(file, "file");
-        Preconditions.parameterNotNull(magicNumbers, "magicNumbers");
-
-        byte[] readBytes = Readers.getBytesFileReader().readOrDefault(file, 0, 32, new byte[0]);
-        return matches(readBytes, magicNumbers);
+    public static boolean hasMagicNumber(Path path, byte[] magicNumbers) throws IOException {
+        return hasMagicNumber(FileManager.newInputStream(path), magicNumbers);
     }
 
     /**
@@ -362,7 +345,7 @@ public class FileUtility {
         Preconditions.parameterNotNull(is, "is");
         Preconditions.parameterNotNull(magicNumbers, "magicNumbers");
 
-        byte[] readBytes = Readers.getBytesStreamReader().readOrDefault(is, 0, 32, new byte[0]);
+        byte[] readBytes = LimitedStreamReaderAsBytes.newInstance(is).readSafe(is, 0, magicNumbers.length, new byte[0]);
         return matches(readBytes, magicNumbers);
     }
 
@@ -370,7 +353,7 @@ public class FileUtility {
         Preconditions.parameterNotNull(header, "header");
         Preconditions.parameterNotNull(magic, "magic");
 
-        if (header.length < magic.length) return false;
+        if (header.length != magic.length) return false;
         for (int i = 0; i < magic.length; i++) {
             if (header[i] != magic[i]) return false;
         }

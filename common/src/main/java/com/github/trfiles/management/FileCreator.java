@@ -1,5 +1,8 @@
 package com.github.trfiles.management;
 
+import com.github.trfiles.management.io.writers.Writer;
+import com.github.trfiles.management.io.writers.toPath.BytesPathWriter;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -7,17 +10,82 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Function;
 
 /**
  * Utility class providing static methods to safely create and delete files
  * and directories with detailed result handling.
  */
 public class FileCreator {
+    public static final Function<Path, BytesPathWriter> EMPTY_ZIP = p -> Writer.builder().toPath(p)
+            .withBytes(new byte[]{80, 75, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
 
     /**
      * Private constructor to prevent instantiation of this utility class.
      */
     private FileCreator() {
+    }
+
+
+    /**
+     * Creates a new empty ZIP file at {@code path}
+     *
+     * @param path The path of the new ZIP
+     * @return a {@link Result} instance indicating the outcome of the operation.
+     */
+    public static @NotNull Result newZIP(Path path) {
+        try {
+            Result newFile = newFile(path);
+            if (!newFile.isSuccess())
+                return newFile;
+
+            if (newFile.status() == Status.ALREADY_EXISTS
+                    && !FileUtility.isZip(path)) {
+                return new Result(Status.DIFFERENT_TYPE, new IOException("A file or directory already exists at " + path + " but is not a ZIP file."));
+            }
+
+            EMPTY_ZIP.apply(path).write();
+            return new Result(Status.SUCCESS, null);
+        } catch (Exception e) {
+            return new Result(Status.ERROR_OCCURS, e);
+        }
+    }
+
+    public static @NotNull Result newZIP(File path) {
+        return newZIP(path.toPath());
+    }
+
+    public static @NotNull Result newZIP(String path) {
+        return newZIP(Paths.get(path));
+    }
+
+
+    /**
+     * Creates a new file at the specified {@link Path}. Parent directories
+     * will <b>NOT</b> be created if they do not exist.
+     *
+     * @param path the target path where the file should be created.
+     * @return a {@link Result} instance indicating the outcome of the operation.
+     */
+    public static @NotNull Result newSimpleFile(Path path) {
+        try {
+            if (Files.exists(path)) return new Result(Status.ALREADY_EXISTS, null);
+            if (Files.isDirectory(path)) return new Result(Status.DIFFERENT_TYPE,
+                    new IOException("The path \"" + path + "\" points to a directory!"));
+
+            Files.createFile(path);
+            return new Result(Status.SUCCESS, null);
+        } catch (IOException e) {
+            return new Result(Status.ERROR_OCCURS, e);
+        }
+    }
+
+    public static @NotNull Result newSimpleFile(File file) {
+        return newSimpleFile(file.toPath());
+    }
+
+    public static @NotNull Result newSimpleFile(String path) {
+        return newSimpleFile(Paths.get(path));
     }
 
     /**
@@ -27,7 +95,7 @@ public class FileCreator {
      * @param path the target path where the file should be created.
      * @return a {@link Result} instance indicating the outcome of the operation.
      */
-    public static Result newFile(Path path) {
+    public static @NotNull Result newFile(Path path) {
         try {
             if (Files.exists(path)) return new Result(Status.ALREADY_EXISTS, null);
             if (Files.isDirectory(path)) return new Result(Status.DIFFERENT_TYPE,
@@ -53,7 +121,7 @@ public class FileCreator {
      * @return a {@link Result} instance indicating the outcome of the operation.
      * @see #newFile(Path)
      */
-    public static Result newFile(File path) {
+    public static @NotNull Result newFile(File path) {
         return newFile(path.toPath());
     }
 
@@ -64,7 +132,7 @@ public class FileCreator {
      * @return a {@link Result} instance indicating the outcome of the operation.
      * @see #newFile(Path)
      */
-    public static Result newFile(String path) {
+    public static @NotNull Result newFile(String path) {
         return newFile(Paths.get(path));
     }
 
@@ -75,7 +143,7 @@ public class FileCreator {
      * @param path the path pointing to the directories to create.
      * @return a {@link Result} instance indicating the outcome of the operation.
      */
-    public static Result newDirectories(Path path) {
+    public static @NotNull Result newDirectories(Path path) {
         if (Files.exists(path)) return new Result(Status.ALREADY_EXISTS, null);
         if (Files.isRegularFile(path)) return new Result(Status.DIFFERENT_TYPE,
                 new IOException("The path \"" + path + "\" points to a regular file!"));
@@ -94,7 +162,7 @@ public class FileCreator {
      * @return a {@link Result} instance indicating the outcome of the operation.
      * @see #newDirectories(Path)
      */
-    public static Result newDirectories(File file) {
+    public static @NotNull Result newDirectories(File file) {
         return newDirectories(file.toPath());
     }
 
@@ -105,16 +173,17 @@ public class FileCreator {
      * @return a {@link Result} instance indicating the outcome of the operation.
      * @see #newDirectories(Path)
      */
-    public static Result newDirectories(String file) {
+    public static @NotNull Result newDirectories(String file) {
         return newDirectories(Paths.get(file));
     }
 
     /**
      * Deletes the file or directory at the specified {@link Path}.
-     * * @param file the target path to delete.
+     *
+     * @param file the target path to delete.
      * @return a {@link Result} instance indicating the outcome of the operation.
      */
-    public static Result delete(Path file) {
+    public static @NotNull Result delete(Path file) {
         try {
             if (!Files.exists(file)) return new Result(Status.ALREADY_NOT_EXISTS, null);
             Files.delete(file);
@@ -131,17 +200,59 @@ public class FileCreator {
      * @return a {@link Result} instance indicating the outcome of the operation.
      * @see #delete(Path)
      */
-    public static Result delete(File file) {
+    public static @NotNull Result delete(File file) {
         return delete(file.toPath());
     }
 
     /**
      * Deletes the file or directory at the specified path string.
      * * @param file the path string of the target to delete.
+     *
      * @return a {@link Result} instance indicating the outcome of the operation.
      * @see #delete(Path)
      */
-    public static Result delete(String file) {
+    public static @NotNull Result delete(String file) {
+        return delete(Paths.get(file));
+    }
+
+    /**
+     * Deletes the file or directory at the specified {@link Path} and all
+     * parent directories.
+     *
+     * @param file the target path to delete.
+     * @return a {@link Result} instance indicating the outcome of the operation.
+     */
+    public static @NotNull Result deleteAll(Path file) {
+        if (!Files.exists(file)) return new Result(Status.ALREADY_NOT_EXISTS, null);
+        Path parent = file;
+
+        while ((parent = parent.getParent()) != null) {
+            Result result = delete(parent);
+            if (!result.isSuccess()) return result;
+        }
+
+        return new Result(Status.SUCCESS, null);
+    }
+
+    /**
+     * Deletes the specified {@link File} and all parent directories.
+     *
+     * @param file the target file to delete.
+     * @return a {@link Result} instance indicating the outcome of the operation.
+     * @see #delete(Path)
+     */
+    public static @NotNull Result deleteAll(File file) {
+        return delete(file.toPath());
+    }
+
+    /**
+     * Deletes the file or directory at the specified path string and all parent directories.
+     *
+     * @param file the path string of the target to delete.
+     * @return a {@link Result} instance indicating the outcome of the operation.
+     * @see #delete(Path)
+     */
+    public static @NotNull Result deleteAll(String file) {
         return delete(Paths.get(file));
     }
 
@@ -170,19 +281,29 @@ public class FileCreator {
      */
     public enum Status {
 
-        /** Indicates the operation completed successfully. */
+        /**
+         * Indicates the operation completed successfully.
+         */
         SUCCESS(true),
 
-        /** Indicates the target file or directory already exists. */
+        /**
+         * Indicates the target file or directory already exists.
+         */
         ALREADY_EXISTS(true),
 
-        /** Indicates the target file or directory already does not exist. */
+        /**
+         * Indicates the target file or directory already does not exist.
+         */
         ALREADY_NOT_EXISTS(true),
 
-        /** Indicates the target path points to a different type than expected (e.g., directory instead of a regular file). */
+        /**
+         * Indicates the target path points to a different type than expected (e.g., directory instead of a regular file).
+         */
         DIFFERENT_TYPE(false),
 
-        /** Indicates an unexpected error occurred during execution. */
+        /**
+         * Indicates an unexpected error occurred during execution.
+         */
         ERROR_OCCURS(false);
 
         private final boolean success;

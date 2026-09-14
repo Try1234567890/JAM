@@ -1,28 +1,60 @@
 package com.github.trfiles.management.io;
 
-import com.github.trfiles.management.FileCreator;
+import com.github.trfiles.utility.ThrowableCollector;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public abstract class IOProcess<I> {
+/**
+ * An IOProcess is the base interface for all systems that
+ * performs IOs operations. These, by default, are inside
+ * the package: {@code com.github.trfiles.management}. These systems
+ * include: Readers, Writers, Streamers, Downloaders, Uploaders, Zipper, Unzipper.
+ *
+ * @param <I> the input of the process.
+ * @param <O> the output of the process.
+ */
+public abstract class IOProcess<I, O> {
+    protected ThrowableCollector exceptions = new ThrowableCollector();
 
-    protected abstract int size(I value);
+    public ThrowableCollector getExceptions() {
+        return exceptions;
+    }
 
-    protected void checkIndexes(I value, int from, int to) {
-        int size = size(value);
-        if (from < 0) {
-            throw new IndexOutOfBoundsException("The \"from\" index is less than 0!");
-        }
-        if (to > size) {
-            throw new IndexOutOfBoundsException("The \"to\" index is greater than the size of the value!");
-        }
-        if (from > to) {
-            throw new IndexOutOfBoundsException("The \"from\" index is greater than the \"to\" index!");
+
+    /**
+     * Retrieve the size of the {@code input value} given.<p>
+     *
+     * @param value The value to retrieve value for.
+     * @return The size of the value.
+     * @throws Exception If an error occurs while retrieve the size.
+     */
+    protected abstract long _size(I value) throws Exception;
+
+    public long size(I value) throws IOException {
+        try {
+            return _size(value);
+        } catch (Throwable t) {
+            throw (t instanceof IOException e ? e : new IOException(t));
         }
     }
 
-    protected void checkFile(Path value) {
+    protected void checkIndexes(I value, long offset, long length) throws IOException {
+        if (offset < 0) {
+            throw new IndexOutOfBoundsException("The \"offset\" index is less than 0!");
+        }
+
+        long size = size(value);
+        if (length > size) {
+            throw new IndexOutOfBoundsException("The \"length\" index is greater than the size of the value!");
+        }
+        if (offset > length) {
+            throw new IndexOutOfBoundsException("The \"offset\" index is greater than the \"length\" index!");
+        }
+    }
+
+    private void checkFile(Path value) {
         if (!Files.exists(value)) {
             throw new IllegalArgumentException("The path " + value + " doesn't exists!");
         }
@@ -39,12 +71,6 @@ public abstract class IOProcess<I> {
     }
 
     protected void checkWritable(Path value) {
-        if (!Files.exists(value)) {
-            Throwable error = FileCreator.newFile(value).error();
-            if (error != null) {
-                throw new IllegalArgumentException("The path " + value + " doesn't exists and cannot be created!", error);
-            }
-        }
         checkFile(value);
         if (!Files.isWritable(value)) {
             throw new IllegalArgumentException("The path " + value + " is not writable!");

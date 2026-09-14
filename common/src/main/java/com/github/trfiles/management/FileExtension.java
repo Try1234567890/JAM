@@ -30,6 +30,7 @@ public record FileExtension(String extension) {
 
     @Override
     public boolean equals(Object object) {
+        if (object instanceof String str) return is(str);
         if (!(object instanceof FileExtension(String ext))) return false;
         return extension.equalsIgnoreCase(ext);
     }
