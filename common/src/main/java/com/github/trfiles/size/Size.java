@@ -1,7 +1,8 @@
 package com.github.trfiles.size;
 
 import com.github.utilities.validators.Preconditions;
-import com.github.trfiles.Utility;
+import com.github.trfiles.utility.Utility;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,7 +82,7 @@ public record Size(double amount, SizeUnit unit) {
      * @param str The string to parse.
      * @return A Size object or null if the string is invalid.
      */
-    public static Size parse(String str) {
+    public static Optional<Size> parse(String str) {
         Preconditions.parameterNotNull(str, "str");
 
         Matcher matcher = REGEX_PATTERN.matcher(str);
@@ -90,17 +92,18 @@ public record Size(double amount, SizeUnit unit) {
             String unitStr = Preconditions.completeNotNull(matcher.group(2), "The unit of size found inside \"" + str + "\" is invalid!");
 
             long amount = Utility.parseLong(amt.trim());
-            SizeUnit unit = SizeUnit.parse(unitStr.trim());
+            Optional<SizeUnit> unit = SizeUnit.parse(unitStr.trim());
 
-            if (unit == null
-                    || amount < 0)
-                return null;
+            if (unit.isEmpty() || amount < 0) {
+                // we return empty if data are missing
+                return Optional.empty();
+            }
 
 
-            return new Size(amount, unit);
+            return Optional.of(new Size(amount, unit.get()));
         }
 
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -233,7 +236,7 @@ public record Size(double amount, SizeUnit unit) {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "TrSize{" + amount + " " + unit + '}';
     }
 
